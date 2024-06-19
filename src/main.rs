@@ -1,5 +1,6 @@
 use regex::Regex;
 use rusqlite::{Connection, Result};
+use std::io::{self, Write};
 use std::path::Path;
 
 // check if table exists
@@ -47,15 +48,18 @@ fn init() -> Result<Connection, rusqlite::Error> {
 // add entries
 fn add(conn: &Connection) -> Result<()> {
     let mut name = String::new();
-    println!("Enter name: ");
-    std::io::stdin()
+    print!("Enter name: ");
+    io::stdout().flush().unwrap();
+
+    io::stdin()
         .read_line(&mut name)
         .expect("Failed to read line");
 
     let mut date = String::new();
+    print!("Enter date (YYYY-MM-DD): ");
 
-    println!("Enter date (YYYY-MM-DD): ");
-    std::io::stdin()
+    io::stdout().flush().unwrap();
+    io::stdin()
         .read_line(&mut date)
         .expect("Failed to read line");
 
