@@ -19,13 +19,14 @@ fn table_exists(conn: &Connection, table_name: &str) -> Result<bool> {
     Ok(exists)
 }
 
-fn main() -> Result<()> {
+fn init() -> Result<Connection, rusqlite::Error> {
     let home = var("HOME").expect("HOME environment variable not set");
     let db_dir_path = home + "/.config/bdaylog/";
     let db_path = db_dir_path.clone() + "data.db";
 
     if !Path::new(&db_dir_path).exists() {
         std::fs::create_dir(&db_dir_path).unwrap();
+        println!("created directory.");
     } else {
         println!("directory exists, skipping creation.");
     }
@@ -40,12 +41,18 @@ fn main() -> Result<()> {
             name  TEXT NOT NULL,
             date  TEXT NOT NULL
         )",
-            (), // empty list of parameters.
+            (),
         )?;
+        println!("created table.");
     } else {
         println!("table already created.");
     }
 
+    Ok(conn)
+}
+
+fn main() -> Result<()> {
+    let conn = init()?;
     // let me = Bday {
     //     name: "Savio".to_string(),
     //     year: 2002,
