@@ -1,11 +1,6 @@
 use rusqlite::{Connection, Result};
 use std::path::Path;
 
-struct Bday {
-    id: i32,
-    name: String,
-    date: String,
-}
 fn table_exists(conn: &Connection, table_name: &str) -> Result<bool> {
     let query = format!(
         "SELECT name FROM sqlite_master WHERE type='table' AND name='{}';",
@@ -70,19 +65,18 @@ fn add(conn: &Connection) -> Result<()> {
 
 fn print_entries(conn: &Connection) -> Result<()> {
     let mut stmt = conn.prepare("SELECT id, name, date FROM bdays")?;
-    let bday_iter = stmt.query_map([], |row| {
-        Ok(Bday {
-            id: row.get(0)?,
-            name: row.get(1)?,
-            date: row.get(2)?,
-        })
+
+    let rows = stmt.query_map([], |row| {
+        let id: i32 = row.get(0)?;
+        let name: String = row.get(1)?;
+        let date: String = row.get(2)?;
+
+        Ok((id, name, date))
     })?;
 
-    for bday in bday_iter {
-        match bday {
-            Ok(bday) => println!("{}. {} - {}", bday.id, bday.name, bday.date),
-            Err(err) => println!("{}", err),
-        }
+    for row in rows {
+        let (id, name, date) = row?;
+        println!("{}. {} - {}", id, name, date);
     }
 
     Ok(())
