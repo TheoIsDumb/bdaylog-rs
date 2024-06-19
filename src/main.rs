@@ -16,6 +16,7 @@ fn table_exists(conn: &Connection, table_name: &str) -> Result<bool> {
     Ok(exists)
 }
 
+// reusable function to get user input
 fn get_user_input(prompt: &str) -> String {
     print!("{}", prompt);
     io::stdout().flush().unwrap();
@@ -78,6 +79,16 @@ fn add(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
+fn del(conn: &Connection) -> Result<(), rusqlite::Error> {
+    list(&conn)?;
+
+    let index = get_user_input("Which entry to delete? ");
+
+    conn.execute("DELETE FROM bdays WHERE id = ?", [index])?;
+
+    Ok(())
+}
+
 // list entries
 fn list(conn: &Connection) -> Result<()> {
     let mut stmt = conn.prepare("SELECT id, name, date FROM bdays")?;
@@ -112,6 +123,7 @@ fn main() -> Result<()> {
     match arg1 {
         "list" => list(&conn)?,
         "add" => add(&conn)?,
+        "del" => del(&conn)?,
         _ => list(&conn)?,
     }
 
