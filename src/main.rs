@@ -79,12 +79,42 @@ fn add(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
+fn update(conn: &Connection) -> Result<(), rusqlite::Error> {
+    list(&conn)?;
+
+    println!("");
+    let index = get_user_input("Which entry to update? ");
+    let name = get_user_input("Updated name (leave empty for previous value): ");
+    let date = get_user_input("Updated date (leave empty for previous value): ");
+
+    if !name.is_empty() && date.is_empty() {
+        conn.execute("UPDATE bdays SET name = ? WHERE id = ?", [name, index])?;
+        println!("Name updated successfully.");
+    } else if !date.is_empty() && name.is_empty() {
+        conn.execute("UPDATE bdays SET date = ? WHERE id = ?", [date, index])?;
+        println!("Date updated successfully.");
+    } else if !name.is_empty() && !date.is_empty() {
+        conn.execute(
+            "UPDATE bdays SET name = ?, date = ? WHERE id = ?",
+            [name, date, index],
+        )?;
+        println!("Name and date updated successfully.");
+    } else if name.is_empty() && date.is_empty() {
+        println!("None updated.")
+    }
+
+    Ok(())
+}
+
 fn del(conn: &Connection) -> Result<(), rusqlite::Error> {
     list(&conn)?;
 
+    println!("");
     let index = get_user_input("Which entry to delete? ");
 
     conn.execute("DELETE FROM bdays WHERE id = ?", [index])?;
+
+    println!("Deleted successfully.");
 
     Ok(())
 }
@@ -121,9 +151,10 @@ fn main() -> Result<()> {
     };
 
     match arg1 {
-        "list" => list(&conn)?,
         "add" => add(&conn)?,
+        "list" => list(&conn)?,
         "del" => del(&conn)?,
+        "update" => update(&conn)?,
         _ => list(&conn)?,
     }
 
