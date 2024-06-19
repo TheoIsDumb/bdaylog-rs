@@ -2,7 +2,6 @@ use rusqlite::{Connection, Result};
 use std::env::var;
 use std::path::Path;
 
-#[derive(Debug)]
 struct Bday {
     name: String,
     date: String,
@@ -51,20 +50,30 @@ fn init() -> Result<Connection, rusqlite::Error> {
     Ok(conn)
 }
 
+fn insert(conn: &Connection) -> Result<()> {
+    let mut name = String::new();
+    println!("Enter name: ");
+    std::io::stdin()
+        .read_line(&mut name)
+        .expect("Failed to read line");
+
+    let mut date = String::new();
+    println!("Enter date: ");
+    std::io::stdin()
+        .read_line(&mut date)
+        .expect("Failed to read line");
+
+    conn.execute(
+        "INSERT INTO bdays (name, date)
+        VALUES (?1, ?2)",
+        (name.trim(), date.trim()),
+    )?;
+
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let conn = init()?;
-    // let me = Bday {
-    //     name: "Savio".to_string(),
-    //     year: 2002,
-    //     month: "January".to_string(),
-    //     day: 4,
-    // };
-
-    // conn.execute(
-    //     "INSERT INTO bdays (name, year, month, day)
-    //     VALUES (?1, ?2, ?3, ?4)",
-    //     (&me.name, &me.year, &me.month, &me.day),
-    // )?;
 
     let mut stmt = conn.prepare("SELECT name, date FROM bdays")?;
     let bday_iter = stmt.query_map([], |row| {
@@ -80,6 +89,8 @@ fn main() -> Result<()> {
             Err(err) => println!("{}", err),
         }
     }
+
+    insert(&conn)?;
 
     Ok(())
 }
