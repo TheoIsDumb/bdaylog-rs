@@ -1,3 +1,4 @@
+use regex::Regex;
 use rusqlite::{Connection, Result};
 use std::path::Path;
 
@@ -52,10 +53,18 @@ fn add(conn: &Connection) -> Result<()> {
         .expect("Failed to read line");
 
     let mut date = String::new();
-    println!("Enter date: ");
+
+    println!("Enter date (YYYY-MM-DD): ");
     std::io::stdin()
         .read_line(&mut date)
         .expect("Failed to read line");
+
+    let re = Regex::new(r"\b\d{4}-\d{2}-\d{2}\b").unwrap();
+
+    if !re.is_match(date.as_str()) {
+        eprintln!("Incorrect format. Enter date in YYYY-MM-DD format.");
+        std::process::exit(1);
+    }
 
     conn.execute(
         "INSERT INTO bdays (name, date)
