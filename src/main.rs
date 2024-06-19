@@ -1,6 +1,7 @@
 use rusqlite::{Connection, Result};
 use std::path::Path;
 
+// check if table exists
 fn table_exists(conn: &Connection, table_name: &str) -> Result<bool> {
     let query = format!(
         "SELECT name FROM sqlite_master WHERE type='table' AND name='{}';",
@@ -13,6 +14,7 @@ fn table_exists(conn: &Connection, table_name: &str) -> Result<bool> {
     Ok(exists)
 }
 
+// init - checks if directory, db and table exist
 fn init() -> Result<Connection, rusqlite::Error> {
     let home = std::env::var("HOME").expect("HOME environment variable not set");
     let db_dir_path = home + "/.config/bdaylog/";
@@ -41,6 +43,7 @@ fn init() -> Result<Connection, rusqlite::Error> {
     Ok(conn)
 }
 
+// add entries
 fn add(conn: &Connection) -> Result<()> {
     let mut name = String::new();
     println!("Enter name: ");
@@ -63,7 +66,8 @@ fn add(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
-fn print_entries(conn: &Connection) -> Result<()> {
+// list entries
+fn list(conn: &Connection) -> Result<()> {
     let mut stmt = conn.prepare("SELECT id, name, date FROM bdays")?;
 
     let rows = stmt.query_map([], |row| {
@@ -82,6 +86,7 @@ fn print_entries(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
+// main
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
 
@@ -93,9 +98,9 @@ fn main() -> Result<()> {
     };
 
     match arg1 {
-        "list" => print_entries(&conn)?,
+        "list" => list(&conn)?,
         "add" => add(&conn)?,
-        _ => print_entries(&conn)?,
+        _ => list(&conn)?,
     }
 
     Ok(())
