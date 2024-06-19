@@ -1,5 +1,4 @@
 use rusqlite::{Connection, Result};
-use std::env::var;
 use std::path::Path;
 
 struct Bday {
@@ -19,15 +18,13 @@ fn table_exists(conn: &Connection, table_name: &str) -> Result<bool> {
 }
 
 fn init() -> Result<Connection, rusqlite::Error> {
-    let home = var("HOME").expect("HOME environment variable not set");
+    let home = std::env::var("HOME").expect("HOME environment variable not set");
     let db_dir_path = home + "/.config/bdaylog/";
     let db_path = db_dir_path.clone() + "data.db";
 
     if !Path::new(&db_dir_path).exists() {
         std::fs::create_dir(&db_dir_path).unwrap();
         println!("created directory.");
-    } else {
-        println!("directory exists, skipping creation.");
     }
 
     let conn = Connection::open(&db_path)?;
@@ -43,14 +40,12 @@ fn init() -> Result<Connection, rusqlite::Error> {
             (),
         )?;
         println!("created table.");
-    } else {
-        println!("table already created.");
     }
 
     Ok(conn)
 }
 
-fn insert(conn: &Connection) -> Result<()> {
+fn add(conn: &Connection) -> Result<()> {
     let mut name = String::new();
     println!("Enter name: ");
     std::io::stdin()
@@ -72,9 +67,7 @@ fn insert(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
-fn main() -> Result<()> {
-    let conn = init()?;
-
+fn print_entries(conn: &Connection) -> Result<()> {
     let mut stmt = conn.prepare("SELECT name, date FROM bdays")?;
     let bday_iter = stmt.query_map([], |row| {
         Ok(Bday {
@@ -90,7 +83,24 @@ fn main() -> Result<()> {
         }
     }
 
-    insert(&conn)?;
+    Ok(())
+}
+
+fn main() -> Result<()> {
+    let args: Vec<String> = std::env::args().collect();
+
+    let conn = init()?;
+
+    let arg1 = match args.get(1) {
+        Some(v) => v,
+        None => "",
+    };
+
+    match arg1 {
+        "list" => print_entries(&conn)?,
+        "add" => add(&conn)?,
+        _ => print_entries(&conn)?,
+    }
 
     Ok(())
 }
