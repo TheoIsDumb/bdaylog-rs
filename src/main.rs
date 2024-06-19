@@ -2,6 +2,7 @@ use rusqlite::{Connection, Result};
 use std::path::Path;
 
 struct Bday {
+    id: i32,
     name: String,
     date: String,
 }
@@ -68,17 +69,18 @@ fn add(conn: &Connection) -> Result<()> {
 }
 
 fn print_entries(conn: &Connection) -> Result<()> {
-    let mut stmt = conn.prepare("SELECT name, date FROM bdays")?;
+    let mut stmt = conn.prepare("SELECT id, name, date FROM bdays")?;
     let bday_iter = stmt.query_map([], |row| {
         Ok(Bday {
-            name: row.get(0)?,
-            date: row.get(1)?,
+            id: row.get(0)?,
+            name: row.get(1)?,
+            date: row.get(2)?,
         })
     })?;
 
     for bday in bday_iter {
         match bday {
-            Ok(bday) => println!("{} - {}", bday.name, bday.date),
+            Ok(bday) => println!("{}. {} - {}", bday.id, bday.name, bday.date),
             Err(err) => println!("{}", err),
         }
     }
