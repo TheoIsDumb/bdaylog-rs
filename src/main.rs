@@ -5,9 +5,18 @@ use std::path::Path;
 #[derive(Debug)]
 struct Bday {
     name: String,
-    year: i32,
-    month: String,
-    day: i32,
+    date: String,
+}
+fn table_exists(conn: &Connection, table_name: &str) -> Result<bool> {
+    let query = format!(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='{}';",
+        table_name
+    );
+
+    let mut stmt = conn.prepare(&query)?;
+    let exists = stmt.exists([])?;
+
+    Ok(exists)
 }
 
 fn main() -> Result<()> {
@@ -22,15 +31,14 @@ fn main() -> Result<()> {
     }
 
     let conn = Connection::open(&db_path)?;
+    let exists = table_exists(&conn, "bdays")?;
 
-    if !Path::new(&db_path).exists() {
+    if !exists {
         conn.execute(
             "CREATE TABLE bdays (
             id    INTEGER PRIMARY KEY,
             name  TEXT NOT NULL,
-            year  INTEGER NOT NULL,
-            month TEXT NOT NULL,
-            day INTEGER NOT NULL
+            date  TEXT NOT NULL
         )",
             (), // empty list of parameters.
         )?;
@@ -51,19 +59,17 @@ fn main() -> Result<()> {
     //     (&me.name, &me.year, &me.month, &me.day),
     // )?;
 
-    let mut stmt = conn.prepare("SELECT name, year, month, day FROM bdays")?;
+    let mut stmt = conn.prepare("SELECT name, date FROM bdays")?;
     let bday_iter = stmt.query_map([], |row| {
         Ok(Bday {
             name: row.get(0)?,
-            year: row.get(1)?,
-            month: row.get(2)?,
-            day: row.get(3)?,
+            date: row.get(1)?,
         })
     })?;
 
     for bday in bday_iter {
         match bday {
-            Ok(bday) => println!("{} - {} {} {}", bday.name, bday.year, bday.month, bday.day),
+            Ok(bday) => println!("{} - {}", bday.name, bday.date),
             Err(err) => println!("{}", err),
         }
     }
