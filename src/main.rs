@@ -16,6 +16,18 @@ fn table_exists(conn: &Connection, table_name: &str) -> Result<bool> {
     Ok(exists)
 }
 
+fn get_user_input(prompt: &str) -> String {
+    print!("{}", prompt);
+    io::stdout().flush().unwrap();
+
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    input.trim().to_string()
+}
+
 // init - checks if directory, db and table exist
 fn init() -> Result<Connection, rusqlite::Error> {
     let home = std::env::var("HOME").expect("HOME environment variable not set");
@@ -47,21 +59,8 @@ fn init() -> Result<Connection, rusqlite::Error> {
 
 // add entries
 fn add(conn: &Connection) -> Result<()> {
-    let mut name = String::new();
-    print!("Enter name: ");
-    io::stdout().flush().unwrap();
-
-    io::stdin()
-        .read_line(&mut name)
-        .expect("Failed to read line");
-
-    let mut date = String::new();
-    print!("Enter date (YYYY-MM-DD): ");
-
-    io::stdout().flush().unwrap();
-    io::stdin()
-        .read_line(&mut date)
-        .expect("Failed to read line");
+    let name = get_user_input("Enter name: ");
+    let date = get_user_input("Enter date (YYYY-MM-DD): ");
 
     let re = Regex::new(r"\b\d{4}-\d{2}-\d{2}\b").unwrap();
 
