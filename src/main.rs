@@ -131,9 +131,14 @@ fn list(conn: &Connection) -> Result<()> {
         Ok((id, name, date))
     })?;
 
+    println!(
+        "\x1b[1m{0: <10} {1: <10} {2: <10}\x1b[0m",
+        "ID", "NAME", "BIRTHDAY"
+    );
+
     for row in rows {
         let (id, name, date) = row?;
-        println!("{}. {} - {}", id, name, date);
+        println!("{0: <10} {1: <10} {2: <10}", id, name, date);
     }
 
     Ok(())
