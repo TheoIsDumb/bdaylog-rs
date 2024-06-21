@@ -29,6 +29,17 @@ fn get_user_input(prompt: &str) -> String {
     input.trim().to_string()
 }
 
+fn print_header() {
+    println!(
+        "\x1b[1m{0: <10} {1: <10} {2: <10}\x1b[0m",
+        "ID", "NAME", "BIRTHDAY"
+    );
+}
+
+fn print_row(id: i32, name: String, date: String) {
+    println!("{0: <10} {1: <10} {2: <10}", id, name, date);
+}
+
 // init - checks if directory, db and table exist
 fn init() -> Result<Connection, rusqlite::Error> {
     let home = std::env::var("HOME").expect("HOME environment variable not set");
@@ -130,14 +141,11 @@ fn search_name(conn: &Connection, query: &str) -> Result<()> {
         Ok((id, name, date))
     })?;
 
-    println!(
-        "\x1b[1m{0: <10} {1: <10} {2: <10}\x1b[0m",
-        "ID", "NAME", "BIRTHDAY"
-    );
+    print_header();
 
     for row in rows {
         let (id, name, date) = row?;
-        println!("{0: <10} {1: <10} {2: <10}", id, name, date);
+        print_row(id, name, date);
     }
 
     Ok(())
@@ -155,14 +163,11 @@ fn list(conn: &Connection) -> Result<()> {
         Ok((id, name, date))
     })?;
 
-    println!(
-        "\x1b[1m{0: <10} {1: <10} {2: <10}\x1b[0m",
-        "ID", "NAME", "BIRTHDAY"
-    );
+    print_header();
 
     for row in rows {
         let (id, name, date) = row?;
-        println!("{0: <10} {1: <10} {2: <10}", id, name, date);
+        print_row(id, name, date);
     }
 
     Ok(())
