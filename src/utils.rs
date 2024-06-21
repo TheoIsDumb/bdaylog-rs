@@ -1,0 +1,71 @@
+use std::io::{self, Write};
+use std::path::Path;
+use rusqlite::{Connection, Result};
+
+// check if table exists
+pub fn table_exists(conn: &Connection, table_name: &str) -> Result<bool> {
+    let query = format!(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='{}';",
+        table_name
+    );
+
+    let mut stmt = conn.prepare(&query)?;
+    let exists = stmt.exists([])?;
+
+    Ok(exists)
+}
+
+// reusable function to get user input
+pub fn get_user_input(prompt: &str) -> String {
+    print!("{}", prompt);
+    io::stdout().flush().unwrap();
+
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    input.trim().to_string()
+}
+
+// print table header
+pub fn print_header() {
+    println!(
+        "\x1b[1m{0: <10} {1: <10} {2: <10}\x1b[0m",
+        "ID", "NAME", "BIRTHDAY"
+    );
+}
+
+// print table row
+pub fn print_row(id: i32, name: String, date: String) {
+    println!("{0: <10} {1: <10} {2: <10}", id, name, date);
+}
+
+// init - checks if directory, db and table exist
+pub fn init() -> Result<Connection, rusqlite::Error> {
+    let home = std::env::var("HOME").expect("HOME environment variable not set");
+    let db_dir_path = home + "/.config/bdaylog/";
+    let db_path = db_dir_path.clone() + "data.db";
+
+    if !Path::new(&db_dir_path).exists() {
+        std::fs::create_dir(&db_dir_path).unwrap();
+        println!("created directory.");
+    }
+
+    let conn = Connection::open(&db_path)?;
+    let exists = table_exists(&conn, "bdays")?;
+
+    if !exists {
+        conn.execute(
+            "CREATE TABLE bdays (
+            id    INTEGER PRIMARY KEY,
+            name  TEXT NOT NULL,
+            date  TEXT NOT NULL
+        )",
+            (),
+        )?;
+        println!("created table.");
+    }
+
+    Ok(conn)
+}
