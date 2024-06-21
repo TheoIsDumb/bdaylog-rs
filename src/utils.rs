@@ -2,6 +2,19 @@ use std::io::{self, Write};
 use std::path::Path;
 use rusqlite::{Connection, Result};
 
+pub fn help() {
+    println!("\x1B[2m{}\x1B[0m\n", "bdaylog");
+
+    println!("\x1B[4m\x1B[2m{}\x1B[0m", "available commands");
+    println!("list - lists all birthdays");
+    println!("add - add new birthday");
+    println!("update - update birthday details");
+    println!("delete - delete a birthday");
+
+    println!("search_name - search a birthday by name");
+    println!("help - print this text");
+}
+
 // check if table exists
 pub fn table_exists(conn: &Connection, table_name: &str) -> Result<bool> {
     let query = format!(

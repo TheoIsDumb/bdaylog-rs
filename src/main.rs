@@ -27,6 +27,7 @@ fn main() -> Result<()> {
         "del" => del(&conn)?,
         "update" => update(&conn)?,
         "search_name" => search_name(&conn, arg2)?,
+        "help" => help(),
         _ => list(&conn)?,
     }
 
