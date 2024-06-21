@@ -119,6 +119,30 @@ fn del(conn: &Connection) -> Result<(), rusqlite::Error> {
     Ok(())
 }
 
+fn search_name(conn: &Connection, query: &str) -> Result<()> {
+    let mut stmt = conn.prepare("SELECT id, name, date FROM bdays WHERE name LIKE ?")?;
+
+    let rows = stmt.query_map([format!("%{}%", query)], |row| {
+        let id: i32 = row.get(0)?;
+        let name: String = row.get(1)?;
+        let date: String = row.get(2)?;
+
+        Ok((id, name, date))
+    })?;
+
+    println!(
+        "\x1b[1m{0: <10} {1: <10} {2: <10}\x1b[0m",
+        "ID", "NAME", "BIRTHDAY"
+    );
+
+    for row in rows {
+        let (id, name, date) = row?;
+        println!("{0: <10} {1: <10} {2: <10}", id, name, date);
+    }
+
+    Ok(())
+}
+
 // list entries
 fn list(conn: &Connection) -> Result<()> {
     let mut stmt = conn.prepare("SELECT id, name, date FROM bdays")?;
@@ -155,11 +179,17 @@ fn main() -> Result<()> {
         None => "",
     };
 
+    let arg2 = match args.get(2) {
+        Some(v) => v,
+        None => "",
+    };
+
     match arg1 {
         "add" => add(&conn)?,
         "list" => list(&conn)?,
         "del" => del(&conn)?,
         "update" => update(&conn)?,
+        "search_name" => search_name(&conn, arg2)?,
         _ => list(&conn)?,
     }
 
