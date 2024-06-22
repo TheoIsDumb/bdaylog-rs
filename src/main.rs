@@ -21,12 +21,17 @@ fn main() -> Result<()> {
         None => "",
     };
 
+    let arg3 = match args.get(3) {
+        Some(v) => v,
+        None => "",
+    };
+
     match arg1 {
         "add" => add(&conn)?,
         "list" => list(&conn)?,
-        "del" => del(&conn)?,
+        "delete" => del(&conn)?,
         "update" => update(&conn)?,
-        "search_name" => search_name(&conn, arg2)?,
+        "search" => search(&conn, arg2, arg3)?,
         "help" => help(),
         _ => list(&conn)?,
     }

@@ -11,7 +11,7 @@ pub fn help() {
     println!("update - update birthday details");
     println!("delete - delete a birthday");
 
-    println!("search_name - search a birthday by name");
+    println!("search - search a birthday");
     println!("help - print this text");
 }
 

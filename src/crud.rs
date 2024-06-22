@@ -63,8 +63,18 @@ pub fn del(conn: &Connection) -> Result<(), rusqlite::Error> {
     Ok(())
 }
 
-pub fn search_name(conn: &Connection, query: &str) -> Result<()> {
-    let mut stmt = conn.prepare("SELECT id, name, date FROM bdays WHERE name LIKE ?")?;
+pub fn search(conn: &Connection, command: &str, query: &str) -> Result<()> {
+    if command == "" {
+        eprintln!("no flag specified.");
+        std::process::exit(2);
+    }
+
+    let sql: &str = match command {
+        "--name" => "SELECT id, name, date FROM bdays WHERE name LIKE ?",
+        _ => "SELECT id, name, date FROM bdays",
+    };
+
+    let mut stmt = conn.prepare(sql)?;
 
     let rows = stmt.query_map([format!("%{}%", query)], |row| {
         let id: i32 = row.get(0)?;
