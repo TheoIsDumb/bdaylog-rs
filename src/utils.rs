@@ -44,14 +44,14 @@ pub fn get_user_input(prompt: &str) -> String {
 // print table header
 pub fn print_header() {
     println!(
-        "\x1b[1m{0: <10} {1: <10} {2: <10}\x1b[0m",
+        "\x1b[1m{0: <3} {1: <10} {2: <10}\x1b[0m",
         "ID", "NAME", "BIRTHDAY"
     );
 }
 
 // print table row
 pub fn print_row(id: i32, name: String, date: String) {
-    println!("{0: <10} {1: <10} {2: <10}", id, name, date);
+    println!("{0: <3} {1: <10} {2: <10}", id, name, date);
 }
 
 // init - checks if directory, db and table exist

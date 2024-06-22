@@ -33,7 +33,8 @@ fn main() -> Result<()> {
         "update" => update(&conn)?,
         "search" => search(&conn, arg2, arg3)?,
         "help" => help(),
-        _ => list(&conn)?,
+        "" => list(&conn)?,
+        _ => eprintln!("no such command."),
     }
 
     Ok(())
