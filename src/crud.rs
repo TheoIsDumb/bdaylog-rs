@@ -1,6 +1,6 @@
+use crate::utils::*;
 use regex::Regex;
 use rusqlite::{Connection, Result};
-use crate::utils::*;
 
 // add entries
 pub fn add(conn: &Connection) -> Result<()> {
@@ -71,18 +71,26 @@ pub fn search(conn: &Connection, command: &str, query: &str) -> Result<()> {
 
     let sql: &str = match command {
         "--name" => "SELECT id, name, date FROM bdays WHERE name LIKE ?",
+        "--year" => "SELECT id, name, date FROM bdays WHERE strftime('%Y', date) = ?",
         _ => "SELECT id, name, date FROM bdays",
     };
 
     let mut stmt = conn.prepare(sql)?;
 
-    let rows = stmt.query_map([format!("%{}%", query)], |row| {
-        let id: i32 = row.get(0)?;
-        let name: String = row.get(1)?;
-        let date: String = row.get(2)?;
+    let rows = stmt.query_map(
+        [if command == "--name" {
+            format!("%{}%", query)
+        } else {
+            format!("{}", query)
+        }],
+        |row| {
+            let id: i32 = row.get(0)?;
+            let name: String = row.get(1)?;
+            let date: String = row.get(2)?;
 
-        Ok((id, name, date))
-    })?;
+            Ok((id, name, date))
+        },
+    )?;
 
     print_header();
 
