@@ -71,18 +71,16 @@ pub fn search(conn: &Connection, command: &str, query: &str) -> Result<()> {
 
     let sql: &str = match command {
         "--name" => "SELECT id, name, date FROM bdays WHERE name LIKE ?",
-        "--year" => "SELECT id, name, date FROM bdays WHERE strftime('%Y', date) = ?",
+        "--year" => "SELECT id, name, date FROM bdays WHERE strftime('%Y', date) LIKE ?",
+        "--month" => "SELECT id, name, date FROM bdays WHERE strftime('%m', date) LIKE ?",
+        "--day" => "SELECT id, name, date FROM bdays WHERE strftime('%d', date) LIKE ?",
         _ => "SELECT id, name, date FROM bdays",
     };
 
     let mut stmt = conn.prepare(sql)?;
 
     let rows = stmt.query_map(
-        [if command == "--name" {
-            format!("%{}%", query)
-        } else {
-            format!("{}", query)
-        }],
+        [format!("%{}%", query)],
         |row| {
             let id: i32 = row.get(0)?;
             let name: String = row.get(1)?;
