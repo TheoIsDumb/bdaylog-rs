@@ -16,22 +16,12 @@ fn main() -> Result<()> {
         None => "",
     };
 
-    let arg2 = match args.get(2) {
-        Some(v) => v,
-        None => "",
-    };
-
-    let arg3 = match args.get(3) {
-        Some(v) => v,
-        None => "",
-    };
-
     match arg1 {
         "add" => add(&conn)?,
         "list" => list(&conn)?,
         "delete" => del(&conn)?,
         "update" => update(&conn)?,
-        "search" => search(&conn, arg2, arg3)?,
+        "search" => search(&conn)?,
         "help" => help(),
         "" => list(&conn)?,
         _ => eprintln!("no such command."),
