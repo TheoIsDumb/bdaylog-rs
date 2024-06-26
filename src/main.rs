@@ -22,6 +22,7 @@ fn main() -> Result<()> {
         "delete" => del(&conn)?,
         "update" => update(&conn)?,
         "search" => search(&conn)?,
+        "today" => today(&conn)?,
         "help" => help(),
         "" => list(&conn)?,
         _ => eprintln!("no such command."),

@@ -1,4 +1,5 @@
 use crate::utils::*;
+use chrono::prelude::*;
 use regex::Regex;
 use rusqlite::{Connection, Result};
 
@@ -63,6 +64,42 @@ pub fn del(conn: &Connection) -> Result<(), rusqlite::Error> {
     Ok(())
 }
 
+pub fn today(conn: &Connection) -> Result<()> {
+    let local: DateTime<Local> = Local::now();
+    let date = local.format("%Y-%m-%d").to_string();
+
+    let row_count: u32 = conn.query_row(
+        "SELECT COUNT(*) FROM bdays WHERE date = ?",
+        [&date],
+        |row| row.get(0),
+    )?;
+
+    let sql: &str = "SELECT id, name, date FROM bdays WHERE date = ?";
+
+    let mut stmt = conn.prepare(sql)?;
+
+    let rows = stmt.query_map([date], |row| {
+        let id: i32 = row.get(0)?;
+        let name: String = row.get(1)?;
+        let date: String = row.get(2)?;
+
+        Ok((id, name, date))
+    })?;
+
+    if row_count > 0 {
+        print_header();
+
+        for row in rows {
+            let (id, name, date) = row?;
+            print_row(id, name, date);
+        }
+    } else {
+        println!("nothing today.");
+    }
+
+    Ok(())
+}
+
 pub fn search(conn: &Connection) -> Result<()> {
     let name = get_user_input("Enter name: ");
 
@@ -70,16 +107,13 @@ pub fn search(conn: &Connection) -> Result<()> {
 
     let mut stmt = conn.prepare(sql.as_str())?;
 
-    let rows = stmt.query_map(
-        [format!("%{}%", name)],
-        |row| {
-            let id: i32 = row.get(0)?;
-            let name: String = row.get(1)?;
-            let date: String = row.get(2)?;
+    let rows = stmt.query_map([format!("%{}%", name)], |row| {
+        let id: i32 = row.get(0)?;
+        let name: String = row.get(1)?;
+        let date: String = row.get(2)?;
 
-            Ok((id, name, date))
-        },
-    )?;
+        Ok((id, name, date))
+    })?;
 
     print_header();
 
