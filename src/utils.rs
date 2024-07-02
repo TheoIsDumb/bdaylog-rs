@@ -5,12 +5,12 @@ use rusqlite::{Connection, Result};
 pub fn help() {
     println!("\x1B[2m{}\x1B[0m\n", "bdaylog");
 
-    println!("\x1B[4m\x1B[2m{}\x1B[0m", "available commands");
     println!("list - lists all birthdays");
     println!("add - add new birthday");
     println!("update - update birthday details");
-    println!("delete - delete a birthday");
+    println!("delete - delete a birthday\n");
 
+    println!("today - check if there's a birthday today");
     println!("search - search a birthday");
     println!("help - print this text");
 }
@@ -44,14 +44,14 @@ pub fn get_user_input(prompt: &str) -> String {
 // print table header
 pub fn print_header() {
     println!(
-        "\x1b[1m{0: <3} {1: <10} {2: <10}\x1b[0m",
+        "\x1b[1m{0: <3} {1: <15} {2: <10}\x1b[0m",
         "ID", "NAME", "BIRTHDAY"
     );
 }
 
 // print table row
 pub fn print_row(id: i32, name: String, date: String) {
-    println!("{0: <3} {1: <10} {2: <10}", id, name, date);
+    println!("{0: <3} {1: <15} {2: <10}", id, name, date);
 }
 
 // init - checks if directory, db and table exist

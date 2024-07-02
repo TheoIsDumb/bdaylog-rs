@@ -87,15 +87,10 @@ pub fn today(conn: &Connection) -> Result<()> {
     })?;
 
     if row_count > 0 {
-        print_header();
-
         for row in rows {
-            let (id, name, date) = row?;
-            print_row(id, name, date);
+            println!("🍰🍰 Happy birthday, {}!", row.unwrap().1);
         }
-    } else {
-        println!("nothing today.");
-    }
+    } 
 
     Ok(())
 }
