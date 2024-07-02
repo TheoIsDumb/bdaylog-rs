@@ -7,3 +7,9 @@ edition = "2021"
 chrono = "0.4.38"
 regex = "1.10.5"
 rusqlite = { version = "0.31.0", features = ["bundled"] }
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"
